@@ -16,28 +16,57 @@ public class Vst
 	
 	private static List<File> paths = new java.util.ArrayList<File>();
 
+	private static final String VST_PATHS = "vst.paths";
+	
 	// assume linux uses dlls somehow, WINE?
 	// assume Mac uses Mach-O, not Carbon VSTs
 	private static final String EXT =
 		System.getProperty("os.name").toLowerCase().startsWith("mac os x") ? ".vst" : ".dll";
 	
-	public static void addPluginPath(String path) {
+	static {
+		File tootdir = new File(System.getProperty("user.home"), "toot");
+		File paths = new File(tootdir, VST_PATHS);
+		if ( !paths.exists() ) {
+			System.err.println("Can't find "+paths.getPath());
+		}
+		if ( paths.exists() ) {
+			readPaths(paths);
+		}
+	}																																		
+	
+	private static void readPaths(File paths) {
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(paths));
+			String line;
+			while ((line = br.readLine()) != null) {
+				addPluginPath(line);
+			}
+			br.close();
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}		
+	}
+	
+	private static void addPluginPath(String path) {
 		paths.add(new File(path));
 	}
 	
 	/**
 	 * Scan VST plugins and cache their details for service provision.
-	 * This method should be called when the cache does not exist.
-	 * If the cache already exists rescan() should be called instead.
+	 * If the cache already exists rescan() is called instead.
 	 * @param cache
 	 * @param synth
 	 */
 	public static void scan(File cache, boolean synth) {
-		if ( cache.exists() ) return; // mustn't overwrite existing cache
+		if ( cache.exists() ) {
+			rescan(cache, synth);
+			return;
+		}
+		
 		scan(new VstPrintStreamScanner(cache), synth);
 	}
 	
-	public static void scan(VstScanner scanner, boolean synth) {
+	private static void scan(VstScanner scanner, boolean synth) {
 		try {
 			scanner.begin();
 			for ( File path : paths ) {
@@ -49,10 +78,11 @@ public class Vst
 		}
 	}
 	
-	protected static void scan(File path, boolean synth, VstScanner scanner) {
+	private static void scan(File path, boolean synth, VstScanner scanner) {
 		File[] files = path.listFiles();
 		for ( int i = 0; i < files.length; i++ ) {
 			File file = files[i];
+			if ( file.lastModified() < scanner.lastModified() ) continue;
 			if ( file.isDirectory() ) {
 				scan(file, synth, scanner);
 				continue;
@@ -91,15 +121,11 @@ public class Vst
 	 * Names must be preserved to maintain user changes.
 	 * Disables must be preserved.
 	 * Plugins may have been added, deleted or moved.
-	 * @param cache
-	 * @param synth
+	 * @param cache the file to use as the plugin cache
+	 * @param synth true for synth plugins, false for effects plugins
 	 */
-	public static void rescan(File cache, boolean synth) {
-		if ( !cache.exists() ) {
-			scan(cache, synth);
-			return;
-		}
-		
+	private static void rescan(File cache, boolean synth) {
+		final long lastModified = cache.lastModified();
 		final VstPluginInfo[] infos = new VstPluginInfo[MAX_PLUGIN_ID+1];
 		final HashMap<String, VstPluginInfo> map = new HashMap<String, VstPluginInfo>();
 		
@@ -115,6 +141,10 @@ public class Vst
 					int id = Integer.parseInt(parts[0]);
 					int pos = Math.abs(id);
 					info = new VstPluginInfo(id, parts[1], parts[2], parts[3], parts[4]);
+					File file = new File(info.getPath());
+					if ( !file.exists() ) info.disable();
+					// we keep the info in case plugin reappears
+					// then it will keep its id
 					infos[pos] = info; 				// array indexed by abs(id)
 					map.put(info.getUid(), info); 	// map keyed by uid
 				}
@@ -147,19 +177,13 @@ public class Vst
 			}
 
 			public void end() {}
+			
+			public long lastModified() { 
+				return lastModified; // each() only called for files more recent than cache 
+			}
 		};
 		scan(scanner, synth);
 
-		// deal with plugin deletions (after moves for simplicity)
-		for ( int i = 1; i <= MAX_PLUGIN_ID; i++) {
-			info = infos[i];
-			if ( info == null ) continue;
-			File file = new File(info.getPath());
-			if ( !file.exists() ) info.disable();
-			// we keep the info in case plugin reappears
-			// then it will keep its id
-		}
-				
 		// backup cache
 		File backup = new File(cache.getPath()+".backup");
 		if ( backup.exists() ) backup.delete();
@@ -251,6 +275,7 @@ public class Vst
 		public void begin() throws Exception;
 		public void each(String uid, String filename, String effectName, String vendorName);
 		public void end();
+		public long lastModified();
 	}
 	
 	protected static class VstPrintStreamScanner implements VstScanner
@@ -275,6 +300,10 @@ public class Vst
 		public void end() {
 			ps.close();		
 			System.out.println("Wrote "+file.getName());
+		}
+		
+		public long lastModified() { 
+			return 0L; // each() will called for all files, regardless of last modified time
 		}
 	}
 	

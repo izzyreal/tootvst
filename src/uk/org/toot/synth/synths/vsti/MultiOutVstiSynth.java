@@ -57,7 +57,13 @@ public class MultiOutVstiSynth extends VstiSynth
 				outName = controls.getName()+" "+String.valueOf(1+j);
 			} else {
 				nchan = props.isFirstInStereoPair() ? 2 : 1;
-				outName = props.getShortLabel(); 
+				outName = props.getLabel();
+				if ( outName.length() > 7 ) {
+					outName = props.getShortLabel();
+					if ( outName.length() < 2 ) {
+						outName = props.getLabel().substring(7);
+					}
+				}
 			}
 			addAudioOutput(new VstiOutput(i, nchan, outName, i == 0));
 		}

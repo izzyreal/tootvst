@@ -33,7 +33,7 @@ public class VstEffectServiceProvider extends AudioServiceProvider
 		File dir = new File(tootdir, "audio");
 		dir.mkdirs();
 		File vstfxCache = new File(dir, VSTFX_CACHE);
-		if ( !vstfxCache.exists() ) Vst.scan(vstfxCache, false);
+		Vst.scan(vstfxCache, false);
 		readCache(vstfxCache);
 	}
 

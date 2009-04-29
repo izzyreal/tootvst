@@ -30,7 +30,7 @@ public class VstiSynthServiceProvider extends SynthServiceProvider
 		File synthdir = new File(tootdir, "synths");
 		synthdir.mkdirs();
 		File vstiCache = new File(synthdir, VSTI_CACHE);
-		if ( !vstiCache.exists() ) Vst.scan(vstiCache, true);
+		Vst.scan(vstiCache, true);
 		readCache(vstiCache);
 	}
 
