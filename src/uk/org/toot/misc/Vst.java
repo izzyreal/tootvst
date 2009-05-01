@@ -14,41 +14,44 @@ public class Vst
 	// any more than 127 and dynamic automation won't work
 	private final static int MAX_PLUGIN_ID = 127;
 	
-	private static List<File> paths = new java.util.ArrayList<File>();
+	private static List<File> paths;
 
-	private static final String VST_PATHS = "vst.paths";
+	private static final int WINDOWS = 0;
+	private static final int MAC_OS_X = 1;
+	private static final int LINUX = 2;
 	
-	// assume linux uses dlls somehow, WINE?
-	// assume Mac uses Mach-O, not Carbon VSTs
-	private static final String EXT =
-		System.getProperty("os.name").toLowerCase().startsWith("mac os x") ? ".vst" : ".dll";
+	private static int os;
 	
 	static {
-		File tootdir = new File(System.getProperty("user.home"), "toot");
-		File paths = new File(tootdir, VST_PATHS);
-		if ( !paths.exists() ) {
-			System.err.println("Can't find "+paths.getPath());
-		}
-		if ( paths.exists() ) {
-			readPaths(paths);
-		}
+		os = decideOS();
+		paths = VstSetup.getPaths();
 	}																																		
 	
-	private static void readPaths(File paths) {
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(paths));
-			String line;
-			while ((line = br.readLine()) != null) {
-				addPluginPath(line);
-			}
-			br.close();
-		} catch ( Exception e ) {
-			e.printStackTrace();
-		}		
+	private static int decideOS() {
+		String osname = System.getProperty("os.name").toLowerCase();
+		if ( osname.startsWith("mac os x") ) {
+			return MAC_OS_X;
+		} else if ( osname.contains("windows") ) {
+			return WINDOWS;
+		} else if ( osname.contains("linux") ) {
+			return LINUX;
+		}
+		return -1;
 	}
 	
-	private static void addPluginPath(String path) {
-		paths.add(new File(path));
+	private static boolean possibleVST(String filename) {
+		switch ( os ) {
+		case WINDOWS:
+			return filename.endsWith(".dll");
+		case MAC_OS_X:
+			// assume Mac uses Mach-O, not Carbon VSTs
+			return filename.endsWith(".vst");
+		case LINUX:
+			// assume linux uses dlls with Wine or native shared objects
+			return filename.endsWith(".dll") || filename.endsWith(".so");
+		default:
+			return false;
+		}
 	}
 	
 	/**
@@ -88,7 +91,7 @@ public class Vst
 				continue;
 			}
 			String filename = file.getPath();
-			if ( filename.endsWith(EXT) ) {
+			if ( possibleVST(filename) ) {
 				JVstHost2 vst = null;
 				try {
 					System.out.print(filename+" creating... ");
