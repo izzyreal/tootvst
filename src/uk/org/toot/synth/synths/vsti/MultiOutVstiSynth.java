@@ -61,7 +61,7 @@ public class MultiOutVstiSynth extends VstiSynth
 				if ( outName.length() > 7 ) {
 					outName = props.getShortLabel();
 					if ( outName.length() < 2 ) {
-						outName = props.getLabel().substring(7);
+						outName = props.getLabel();
 					}
 				}
 			}
