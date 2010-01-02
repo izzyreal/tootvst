@@ -62,12 +62,8 @@ public class VstEffectServiceProvider extends AudioServiceProvider
 	
 	@Override
     protected AudioControls createControls(ServiceDescriptor d) {
-//		Class<VstEffectControls> clazz = VstEffectControls.class;
 		try {
 			return new VstEffectControls((AudioControlServiceDescriptor)d);
-/*			Constructor<VstEffectControls> ctor = 
-				clazz.getConstructor(AudioControlServiceDescriptor.class);
-			return ctor.newInstance((AudioControlServiceDescriptor)d); */
 		} catch ( Exception e ) {
 			e.printStackTrace();
 		}
