@@ -82,10 +82,14 @@ public class Vst
 	}
 	
 	private static void scan(File path, boolean synth, VstScanner scanner) {
+		// when a vst is written to a directory, the last modified time for that
+		// directory will be updated to newer than the cache file so the whole directory 
+		// must be scanned then but not otherwise.
+		if ( path.lastModified() < scanner.lastModified() ) return;
+//		System.out.println(path.getPath()+","+path.lastModified()+">"+scanner.lastModified());
 		File[] files = path.listFiles();
 		for ( int i = 0; i < files.length; i++ ) {
 			File file = files[i];
-			if ( file.lastModified() < scanner.lastModified() ) continue;
 			if ( file.isDirectory() ) {
 				scan(file, synth, scanner);
 				continue;
@@ -306,7 +310,7 @@ public class Vst
 		}
 		
 		public long lastModified() { 
-			return 0L; // each() will called for all files, regardless of last modified time
+			return 0L; // each() will called for all dirs, regardless of last modified time
 		}
 	}
 	
