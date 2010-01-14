@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.FileReader;
 //import java.lang.reflect.Constructor;
 
-import uk.org.toot.control.CompoundControl;
 import uk.org.toot.misc.Vst;
 import uk.org.toot.service.ServiceDescriptor;
 import uk.org.toot.synth.MidiSynth;
@@ -59,19 +58,15 @@ public class VstiSynthServiceProvider extends SynthServiceProvider
 	
 	@Override
     protected SynthControls createControls(ServiceDescriptor d) {
-//		Class<VstiSynthControls> clazz = VstiSynthControls.class;
 		try {
 			return new VstiSynthControls(d);
-/*			Constructor<VstiSynthControls> ctor = 
-				clazz.getConstructor(ServiceDescriptor.class);
-			return ctor.newInstance(d); */
 		} catch ( Exception e ) {
 			e.printStackTrace();
 		}
 		return null;
     }
     
-	public MidiSynth createSynth(CompoundControl c) {
+	public MidiSynth createSynth(SynthControls c) {
 		VstiSynthControls sc = (VstiSynthControls)c;
 		int nchan = sc.getVst().numOutputs();
 		return nchan > 2 ? new MultiOutVstiSynth(sc) : new SimpleVstiSynth(sc);
