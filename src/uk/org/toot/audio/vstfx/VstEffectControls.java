@@ -31,8 +31,6 @@ public class VstEffectControls extends AudioControls implements VstHost
 		return nativeSupport;
 	}
 	
-	public boolean canBypass() { return true; }
-
 	// causes plugins to show Preset menu
 	public boolean isPluginParent() { 
 		return true; 
