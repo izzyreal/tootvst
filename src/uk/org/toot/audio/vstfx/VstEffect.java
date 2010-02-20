@@ -11,7 +11,6 @@ import com.synthbot.audioplugin.vst.vst2.*;
 
 import uk.org.toot.audio.core.AudioBuffer;
 import uk.org.toot.audio.core.AudioProcess;
-import uk.org.toot.audio.core.ChannelFormat;
 import uk.org.toot.misc.TempoListener;
 import uk.org.toot.misc.plugin.Plugin;
 import uk.org.toot.misc.plugin.PluginSupport;
@@ -79,9 +78,7 @@ public class VstEffect implements AudioProcess
 			wasBypassed = bypassed;
 		}
 		if ( bypassed ) return AUDIO_OK;
-        if ( buffer.getChannelCount() < 2 ) { // !!! must be mono
-        	buffer.convertTo(ChannelFormat.STEREO);
-        }
+		buffer.monoToStereo();
 		int ns = buffer.getSampleCount();
 		if ( ns != nsamples ) {
 			nsamples = ns;
