@@ -13,8 +13,8 @@ import uk.org.toot.audio.core.ChannelFormat;
 import uk.org.toot.audio.system.AudioOutput;
 import uk.org.toot.misc.plugin.Plugin;
 import uk.org.toot.misc.plugin.PluginSupport;
-import uk.org.toot.misc.TempoListener;
-import uk.org.toot.misc.TimeSignatureListener;
+import uk.org.toot.misc.Tempo;
+import uk.org.toot.misc.TimeSignature;
 import uk.org.toot.misc.plugin.PluginTransportListener;
 
 import com.synthbot.audioplugin.vst.vst2.VstPinProperties;
@@ -38,8 +38,8 @@ public class SimpleVstiSynth extends VstiSynth implements AudioOutput
 	private VstiSynthControls controls;
 	private PluginSupport support;
 	private PluginTransportListener transportListener;
-	private TempoListener tempoListener;
-	private TimeSignatureListener timeSignatureListener;
+	private Tempo.Listener tempoListener;
+	private TimeSignature.Listener timeSignatureListener;
 	private String location;
 	
 	public SimpleVstiSynth(final VstiSynthControls controls) {
@@ -82,13 +82,13 @@ public class SimpleVstiSynth extends VstiSynth implements AudioOutput
 			}			
 		};
 		
-		tempoListener = new TempoListener() {
+		tempoListener = new Tempo.Listener() {
 			public void tempoChanged(float newTempo) {
 				vsti.setTempo(newTempo);				
 			}			
 		};
 
-		timeSignatureListener = new TimeSignatureListener() {
+		timeSignatureListener = new TimeSignature.Listener() {
 			public void timeSignatureChanged(int numerator, int denominator) {
 				vsti.setTimeSignature(numerator, denominator);				
 			}			

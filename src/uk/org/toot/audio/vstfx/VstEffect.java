@@ -12,7 +12,7 @@ import com.synthbot.audioplugin.vst.vst2.*;
 import uk.org.toot.audio.core.AudioBuffer;
 import uk.org.toot.audio.core.AudioProcess;
 import uk.org.toot.audio.core.ChannelFormat;
-import uk.org.toot.misc.TempoListener;
+import uk.org.toot.misc.Tempo;
 import uk.org.toot.misc.plugin.Plugin;
 import uk.org.toot.misc.plugin.PluginSupport;
 
@@ -35,7 +35,7 @@ public class VstEffect implements AudioProcess
 	private boolean bypassed;
 	private boolean wasBypassed = false;
 	private PluginSupport support;
-	private TempoListener tempoListener;
+	private Tempo.Listener tempoListener;
 	
 	public VstEffect(VstEffectControls controls) {
 		this.controls = controls;
@@ -57,7 +57,7 @@ public class VstEffect implements AudioProcess
 		if ( mustClear ) System.err.println(" !!! Must Clear");
 		else System.out.println(); */
 		support = Plugin.getPluginSupport();
-		tempoListener = new TempoListener() {
+		tempoListener = new Tempo.Listener() {
 			public void tempoChanged(float newTempo) {
 				vstfx.setTempo(newTempo);				
 			}			
