@@ -126,10 +126,14 @@ public class MultiOutVstiSynth extends VstiSynth
 			if ( !master ) return;
 			System.out.print("Opening audio: "+controls.getName()+" ... ");
 			vsti.turnOn();
-			System.out.println("opened");
-			support.addTempoListener(tempoListener);
-			support.addTimeSignatureListener(timeSignatureListener);
-			support.addTransportListener(transportListener);
+            if ( support != null ) {
+                support.addTempoListener(tempoListener);
+                support.addTimeSignatureListener(timeSignatureListener);
+                support.addTransportListener(transportListener);
+            } else {
+                System.out.print("Plugin.setPluginSupport() has not been called, can't listen for Tempo, Time Signature or Transport! ... ");                
+            }
+            System.out.println("opened");
 		}
 
 		public int processAudio(AudioBuffer buffer) {
@@ -169,10 +173,12 @@ public class MultiOutVstiSynth extends VstiSynth
 			if ( !master ) return;
 			System.out.print("Closing audio: "+controls.getName()+" ... ");
 			vsti.turnOffAndUnloadPlugin();
-			System.out.println("closed");
-			support.removeTempoListener(tempoListener);
-			support.removeTimeSignatureListener(timeSignatureListener);
-			support.removeTransportListener(transportListener);
+            if ( support != null ) {
+                support.removeTempoListener(tempoListener);
+                support.removeTimeSignatureListener(timeSignatureListener);
+                support.removeTransportListener(transportListener);
+            }
+            System.out.println("closed");
 		}
 
 		public String getLocation() {

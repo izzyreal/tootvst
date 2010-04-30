@@ -67,8 +67,12 @@ public class VstEffect implements AudioProcess
 	public void open() throws Exception {
 		System.out.print("Opening audio: "+controls.getName()+" ... ");
 		vstfx.turnOn();
-		System.out.println("opened");
-		support.addTempoListener(tempoListener);
+        if ( support != null ) {
+            support.addTempoListener(tempoListener);
+        } else {
+            System.out.print("Plugin.setPluginSupport() has not been called, can't listen for Tempo! ... ");
+        }
+        System.out.println("opened");
 	}
 
 	public int processAudio(AudioBuffer buffer) {
@@ -120,7 +124,9 @@ public class VstEffect implements AudioProcess
 	public void close() throws Exception {
 		System.out.print("Closing audio: "+controls.getName()+" ... ");
 		vstfx.turnOffAndUnloadPlugin();
-		System.out.println("closed");
-		support.removeTempoListener(tempoListener);
+        if ( support != null ) {
+            support.removeTempoListener(tempoListener);
+        }
+        System.out.println("closed");
 	}
 }
