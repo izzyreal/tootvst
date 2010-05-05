@@ -13,8 +13,6 @@ import uk.org.toot.audio.core.AudioBuffer;
 import uk.org.toot.audio.core.AudioProcess;
 import uk.org.toot.audio.core.ChannelFormat;
 import uk.org.toot.misc.Tempo;
-import uk.org.toot.misc.plugin.Plugin;
-import uk.org.toot.misc.plugin.PluginSupport;
 
 /**
  * This class has a single audio output, for mono and stereo VST effects.
@@ -34,7 +32,6 @@ public class VstEffect implements AudioProcess
 	private JVstHost2 vstfx;
 	private boolean bypassed;
 	private boolean wasBypassed = false;
-	private PluginSupport support;
 	private Tempo.Listener tempoListener;
 	
 	public VstEffect(VstEffectControls controls) {
@@ -56,7 +53,6 @@ public class VstEffect implements AudioProcess
 /*		System.out.print("Using "+controls.getName());
 		if ( mustClear ) System.err.println(" !!! Must Clear");
 		else System.out.println(); */
-		support = Plugin.getPluginSupport();
 		tempoListener = new Tempo.Listener() {
 			public void tempoChanged(float newTempo) {
 				vstfx.setTempo(newTempo);				
@@ -67,11 +63,7 @@ public class VstEffect implements AudioProcess
 	public void open() throws Exception {
 		System.out.print("Opening audio: "+controls.getName()+" ... ");
 		vstfx.turnOn();
-        if ( support != null ) {
-            support.addTempoListener(tempoListener);
-        } else {
-            System.out.print("Plugin.setPluginSupport() has not been called, can't listen for Tempo! ... ");
-        }
+        Tempo.addTempoListener(tempoListener);
         System.out.println("opened");
 	}
 
@@ -124,9 +116,7 @@ public class VstEffect implements AudioProcess
 	public void close() throws Exception {
 		System.out.print("Closing audio: "+controls.getName()+" ... ");
 		vstfx.turnOffAndUnloadPlugin();
-        if ( support != null ) {
-            support.removeTempoListener(tempoListener);
-        }
+        Tempo.removeTempoListener(tempoListener);
         System.out.println("closed");
 	}
 }

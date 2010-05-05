@@ -11,11 +11,8 @@ import uk.org.toot.audio.core.AudioBuffer;
 import uk.org.toot.audio.core.AudioProcess;
 import uk.org.toot.audio.core.ChannelFormat;
 import uk.org.toot.audio.system.AudioOutput;
-import uk.org.toot.misc.plugin.Plugin;
-import uk.org.toot.misc.plugin.PluginSupport;
 import uk.org.toot.misc.Tempo;
 import uk.org.toot.misc.TimeSignature;
-import uk.org.toot.misc.plugin.PluginTransportListener;
 
 import com.synthbot.audioplugin.vst.vst2.VstPinProperties;
 
@@ -36,8 +33,6 @@ public class SimpleVstiSynth extends VstiSynth implements AudioOutput
 	private ChannelFormat format;
 	private boolean mustClear = false;
 	private VstiSynthControls controls;
-	private PluginSupport support;
-	private PluginTransportListener transportListener;
 	private Tempo.Listener tempoListener;
 	private TimeSignature.Listener timeSignatureListener;
 	private String location;
@@ -72,16 +67,6 @@ public class SimpleVstiSynth extends VstiSynth implements AudioOutput
 //		if ( mustClear ) System.err.println(" !!! Must Clear");
 //		else System.out.println();
 		
-		support = Plugin.getPluginSupport();
-		
-		transportListener = new PluginTransportListener() {
-			public void play() {
-			}
-
-			public void stop() {
-			}			
-		};
-		
 		tempoListener = new Tempo.Listener() {
 			public void tempoChanged(float newTempo) {
 				vsti.setTempo(newTempo);				
@@ -107,13 +92,8 @@ public class SimpleVstiSynth extends VstiSynth implements AudioOutput
 	public void open() throws Exception {
 		System.out.print("Opening audio: "+controls.getName()+" ... ");
 		vsti.turnOn();
-        if ( support != null ) {
-            support.addTempoListener(tempoListener);
-		    support.addTimeSignatureListener(timeSignatureListener);
-		    support.addTransportListener(transportListener);
-        } else {
-            System.out.print("Plugin.setPluginSupport() has not been called, can't listen for Tempo, Time Signature or Transport! ... ");
-        }
+        Tempo.addTempoListener(tempoListener);
+        TimeSignature.addTimeSignatureListener(timeSignatureListener);
         System.out.println("opened");
 	}
 
@@ -151,11 +131,8 @@ public class SimpleVstiSynth extends VstiSynth implements AudioOutput
 	public void close() throws Exception {
 		System.out.print("Closing audio: "+controls.getName()+" ... ");
 		vsti.turnOffAndUnloadPlugin();
-        if ( support != null ) {
-            support.removeTempoListener(tempoListener);
-            support.removeTimeSignatureListener(timeSignatureListener);
-            support.removeTransportListener(transportListener);
-        }
+        Tempo.removeTempoListener(tempoListener);
+        TimeSignature.removeTimeSignatureListener(timeSignatureListener);
         System.out.println("closed");
 	}
 }
