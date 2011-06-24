@@ -41,7 +41,7 @@ public class VstiSynthServiceProvider extends SynthServiceProvider
 			while ((line = br.readLine()) != null) {
 				if ( line.charAt(0) == '-') continue; // disabled
 				String[] parts = line.split(", ");
-				if ( parts.length > 1 ) {
+				if ( parts.length > 3 ) {
 					addVstiControls(parts[3], parts[2]);
 				}
 			}

@@ -45,7 +45,7 @@ public class VstEffectServiceProvider extends AudioServiceProvider
 			while ((line = br.readLine()) != null) {
 				if ( line.charAt(0) == '-') continue; // disabled
 				String[] parts = line.split(", ");
-				if ( parts.length > 1 ) {
+				if ( parts.length > 3 ) {
 					addVstControls(Integer.parseInt(parts[0]), parts[3], parts[2]);
 				}
 			}
